@@ -1,6 +1,14 @@
 import React from 'react';
 import Relay from 'react-relay';
 
+Relay.injectNetworkLayer(
+  new Relay.DefaultNetworkLayer('/graphql', {
+    headers: {
+      Authorization: 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIn0.yCYyy6yYgTIrbfrQ1n_VrwmlusBHPnU1Q1yzZDSLql0'
+    }
+  })
+);
+
 class App extends React.Component {
   render() {
     return (

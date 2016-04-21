@@ -37,6 +37,7 @@ import {
   getViewer,
   getWidget,
   getWidgets,
+  getWidgetsByViewerId
 } from './database';
 
 /**
@@ -80,7 +81,12 @@ var userType = new GraphQLObjectType({
       type: widgetConnection,
       description: 'A person\'s collection of widgets',
       args: connectionArgs,
-      resolve: (_, args) => connectionFromArray(getWidgets(), args),
+      resolve: (user, args, jwt) => {
+        console.log("THE ARGS")
+        console.log(user, args);
+        console.log(jwt);
+        return connectionFromArray(getWidgetsByViewerId(jwt.userId), args)
+      },
     },
   }),
   interfaces: [nodeInterface],

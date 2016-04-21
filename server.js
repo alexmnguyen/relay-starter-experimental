@@ -5,16 +5,35 @@ import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import {Schema} from './data/schema';
 
-const APP_PORT = 3000;
+import jwt from 'express-jwt'
+
+const APP_PORT = 3001;
 const GRAPHQL_PORT = 8080;
 
 // Expose a GraphQL endpoint
 var graphQLServer = express();
-graphQLServer.use('/', graphQLHTTP({
-  graphiql: true,
-  pretty: true,
-  schema: Schema,
+
+graphQLServer.use(jwt({ secret: 'secret'}));
+
+graphQLServer.use('/', graphQLHTTP(request => {
+  //console.log(request.headers['authorization']);
+  console.log(request.user);
+  return {
+    graphiql: true,
+    schema: Schema,
+    //send user information over as context
+    context: request.user
+  }
 }));
+
+// graphQLServer.use('/', (req, res) => {
+//   return graphQLHTTP({
+//     schema,
+//     graphiql: true, // or whatever you want
+//     context: req.user,
+//   })(req, res);
+// );
+
 graphQLServer.listen(GRAPHQL_PORT, () => console.log(
   `GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`
 ));

@@ -25,14 +25,16 @@ var widgets = ['What\'s-it', 'Who\'s-it', 'How\'s-it'].map((name, i) => {
   return widget;
 });
 
-function getWidgetsByViewer(id){
+function getWidgetsByViewerId(id){
   var viewerWidgets = []
 
   widgets.forEach(function(widget){
     if(widget.viewerId === id){
-      return widget;
+      viewerWidgets.push(widget);
     }
-  })
+  });
+
+  return viewerWidgets;
 }
 
 module.exports = {
@@ -41,6 +43,10 @@ module.exports = {
   getViewer: () => viewer,
   getWidget: (id) => widgets.find(w => w.id === id),
   getWidgets: () => widgets,
+  getWidgetsByViewerId: (id) => {
+    console.log("Attempting to get widgets by viewer id");
+    return getWidgetsByViewerId(id)
+  },
   User,
   Widget,
 };
