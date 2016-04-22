@@ -82,9 +82,7 @@ var userType = new GraphQLObjectType({
       description: 'A person\'s collection of widgets',
       args: connectionArgs,
       resolve: (user, args, jwt) => {
-        console.log("THE ARGS")
-        console.log(user, args);
-        console.log(jwt);
+        //the third parameter is the context, which we passed request.user to, which is the decoded jwt.
         return connectionFromArray(getWidgetsByViewerId(jwt.userId), args)
       },
     },

@@ -21,6 +21,8 @@ var widgets = ['What\'s-it', 'Who\'s-it', 'How\'s-it'].map((name, i) => {
   var widget = new Widget();
   widget.name = name;
   widget.id = `${i}`;
+
+  //this is to link viewer ids with widgets
   widget.viewerId = '1';
   return widget;
 });
@@ -44,7 +46,6 @@ module.exports = {
   getWidget: (id) => widgets.find(w => w.id === id),
   getWidgets: () => widgets,
   getWidgetsByViewerId: (id) => {
-    console.log("Attempting to get widgets by viewer id");
     return getWidgetsByViewerId(id)
   },
   User,

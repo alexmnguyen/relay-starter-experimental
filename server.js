@@ -13,10 +13,13 @@ const GRAPHQL_PORT = 8080;
 // Expose a GraphQL endpoint
 var graphQLServer = express();
 
+//set up the jwt secret
 graphQLServer.use(jwt({ secret: 'secret'}));
 
+//set up our context to store our decoded jwt. The jwt is automatically decoded
+//by the express-jwt middleware.
 graphQLServer.use('/', graphQLHTTP(request => {
-  //console.log(request.headers['authorization']);
+
   console.log(request.user);
   return {
     graphiql: true,
@@ -25,14 +28,6 @@ graphQLServer.use('/', graphQLHTTP(request => {
     context: request.user
   }
 }));
-
-// graphQLServer.use('/', (req, res) => {
-//   return graphQLHTTP({
-//     schema,
-//     graphiql: true, // or whatever you want
-//     context: req.user,
-//   })(req, res);
-// );
 
 graphQLServer.listen(GRAPHQL_PORT, () => console.log(
   `GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`
