@@ -14,13 +14,13 @@ const GRAPHQL_PORT = 8080;
 var graphQLServer = express();
 
 //set up the jwt secret
-graphQLServer.use(jwt({ secret: 'secret'}));
+graphQLServer.use(jwt({ secret: 'secret'}).unless({path: ['/graphiql']}));
 
 //set up our context to store our decoded jwt. The jwt is automatically decoded
 //by the express-jwt middleware.
 graphQLServer.use('/', graphQLHTTP(request => {
 
-  console.log(request.user);
+  //console.log(request.user);
   return {
     graphiql: true,
     schema: Schema,
@@ -51,7 +51,8 @@ var app = new WebpackDevServer(compiler, {
   contentBase: '/public/',
   proxy: {'/graphql': `http://localhost:${GRAPHQL_PORT}`},
   publicPath: '/js/',
-  stats: {colors: true}
+  stats: {colors: true},
+  noInfo: true
 });
 // Serve static resources
 app.use('/', express.static(path.resolve(__dirname, 'public')));

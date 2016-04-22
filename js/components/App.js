@@ -1,5 +1,6 @@
 import React from 'react';
 import Relay from 'react-relay';
+import CreateWidgetMutation from '../mutations/CreateWidgetMutation'
 
 Relay.injectNetworkLayer(
   new Relay.DefaultNetworkLayer('/graphql', {
@@ -10,7 +11,30 @@ Relay.injectNetworkLayer(
 );
 
 class App extends React.Component {
+
+  handleAddWidget = (e) => {
+    e.preventDefault();
+    console.log(this.state.widgetNameInput)
+    Relay.Store.commitUpdate(
+      new CreateWidgetMutation({
+        name: this.state.widgetNameInput
+      })
+    );
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {widgetNameInput:''};
+  }
+
+  handleWidgetNameInputChange = (e) => {
+    this.setState({widgetNameInput: e.target.value});
+  }
+
   render() {
+
+    console.log(this.props);
+
     return (
       <div>
         <h1>Widget list</h1>
@@ -19,6 +43,12 @@ class App extends React.Component {
             <li key={edge.node.id}>{edge.node.name} (ID: {edge.node.id})</li>
           )}
         </ul>
+        <h1>Add a widget</h1>
+        <form onSubmit={this.handleAddWidget}>
+          Widget Name:<br/>
+        <input type="text" name="widgetNameInput" value={this.state.widgetNameInput} onChange={this.handleWidgetNameInputChange}/><br/>
+          <input type="submit" value="Add"/>
+        </form>
       </div>
     );
   }

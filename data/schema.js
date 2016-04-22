@@ -27,6 +27,7 @@ import {
   globalIdField,
   mutationWithClientMutationId,
   nodeDefinitions,
+  cursorForObjectInConnection,
 } from 'graphql-relay';
 
 import {
@@ -34,10 +35,10 @@ import {
   User,
   Widget,
   getUser,
-  getViewer,
   getWidget,
   getWidgets,
-  getWidgetsByViewerId
+  getWidgetsByUserId,
+  createWidget
 } from './database';
 
 /**
@@ -83,7 +84,7 @@ var userType = new GraphQLObjectType({
       args: connectionArgs,
       resolve: (user, args, jwt) => {
         //the third parameter is the context, which we passed request.user to, which is the decoded jwt.
-        return connectionFromArray(getWidgetsByViewerId(jwt.userId), args)
+        return connectionFromArray(getWidgetsByUserId(jwt.userId), args)
       },
     },
   }),
@@ -106,8 +107,10 @@ var widgetType = new GraphQLObjectType({
 /**
  * Define your own connection types here
  */
-var {connectionType: widgetConnection} =
-  connectionDefinitions({name: 'Widget', nodeType: widgetType});
+var {
+  connectionType: widgetConnection,
+  edgeType: WidgetEdge
+} = connectionDefinitions({name: 'Widget', nodeType: widgetType});
 
 /**
  * This is the type that will be the root of our query,
@@ -120,8 +123,53 @@ var queryType = new GraphQLObjectType({
     // Add your own root fields here
     viewer: {
       type: userType,
-      resolve: () => getViewer(),
+      //get the viewer but with a jwt context
+      resolve: (user,args,jwt) => {
+        return getUser(jwt.userId)
+      }
     },
+  }),
+});
+
+const CreateWidgetMutation = mutationWithClientMutationId({
+  name: 'CreateWidget',
+  inputFields: {
+    //the widget name
+    name: { type: new GraphQLNonNull(GraphQLString) },
+  },
+  outputFields: {
+    newWidgetEdge: {
+      type: WidgetEdge,
+      resolve: (payload,arg2,info) => {
+        const widget = getWidget(payload.id);
+
+        return{
+          cursor: cursorForObjectInConnection(
+            getWidgetsByViewerId('1'),
+          ),
+          node: widget,
+        };
+      },
+    },
+    widget: {
+      type: widgetType,
+      resolve: ({widget}) => {
+        //output the widget information
+        widget
+      }
+    }
+  },
+  //This happens before the outputFields are generated. The return goes to the outputFields.
+  mutateAndGetPayload: ({name, userId},context,info) => {
+    let widget = createWidget(name, info.userId);
+    return {widget};
+  }
+});
+
+const mutationType = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: () => ({
+    createWidget: CreateWidgetMutation,
   }),
 });
 
@@ -129,12 +177,12 @@ var queryType = new GraphQLObjectType({
  * This is the type that will be the root of our mutations,
  * and the entry point into performing writes in our schema.
  */
-var mutationType = new GraphQLObjectType({
-  name: 'Mutation',
-  fields: () => ({
-    // Add your own mutations here
-  })
-});
+// var mutationType = new GraphQLObjectType({
+//   name: 'Mutation',
+//   fields: () => ({
+//     // Add your own mutations here
+//   })
+// });
 
 /**
  * Finally, we construct our schema (whose starting query type is the query
@@ -143,5 +191,5 @@ var mutationType = new GraphQLObjectType({
 export var Schema = new GraphQLSchema({
   query: queryType,
   // Uncomment the following after adding some mutation fields:
-  // mutation: mutationType
+   mutation: mutationType
 });

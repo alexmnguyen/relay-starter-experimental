@@ -11,42 +11,62 @@
 class User {}
 class Widget {}
 
-// Mock data: create 2 users
-var viewer = new User();
-var viewer2 = new User();
+// Mock data: create 2 users, with id 1 and id 2
+var user = new User();
+user.id = '1';
+user.name = 'One User';
+var user2 = new User();
+user2.id = '2';
+user2.name = 'Two User';
 
-viewer.id = '1';
-viewer.name = 'Anonymous';
 var widgets = ['What\'s-it', 'Who\'s-it', 'How\'s-it'].map((name, i) => {
   var widget = new Widget();
   widget.name = name;
   widget.id = `${i}`;
 
+  console.log(widget.id);
+
   //this is to link viewer ids with widgets
-  widget.viewerId = '1';
+  //widget.viewerId = '1';
   return widget;
 });
 
-function getWidgetsByViewerId(id){
-  var viewerWidgets = []
+//assign the first user these widgets.
+user.widgets = widgets;
 
-  widgets.forEach(function(widget){
-    if(widget.viewerId === id){
-      viewerWidgets.push(widget);
-    }
-  });
+//create a mock database with user ids as the key
+var userDb = {
+  '1': user,
+  '2': user2
+};
 
-  return viewerWidgets;
+//create a widget given a widget name and user id
+function createWidget(name, userId){
+  //get length of widgets
+  var nextIndex = widgets.length;
+  var widget = new Widget();
+  widget.name = name;
+  widget.id = `${i}`;
+
+  userDb[userId].widgets.push(widget);
+
+  return widget;
+}
+
+function getWidgetsByUserId(userId){
+  return userDb[userId].widgets;
 }
 
 module.exports = {
   // Export methods that your schema can use to interact with your database
-  getUser: (id) => id === viewer.id ? viewer : null,
-  getViewer: () => viewer,
+  getUser: (id) => {
+    return userDb[id]
+  },
+  //getViewer: () => viewer,
   getWidget: (id) => widgets.find(w => w.id === id),
   getWidgets: () => widgets,
-  getWidgetsByViewerId: (id) => {
-    return getWidgetsByViewerId(id)
+  getWidgetsByUserId: (id) => {
+    return getWidgetsByUserId(id)
   },
   User,
   Widget,
